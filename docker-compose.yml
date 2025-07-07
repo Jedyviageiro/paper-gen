@@ -1,0 +1,33 @@
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: paper-gen-db
+    restart: always
+    environment:
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DB=${PG_DATABASE}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d 
+
+
+  app:
+    build: .
+    container_name: paper-gen-app
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "${PORT}:${PORT}"
+    env_file: .env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules # Prevents host node_modules from overwriting container's
+
+volumes:
+  pgdata:
+
